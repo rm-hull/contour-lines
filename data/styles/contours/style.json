@@ -1,0 +1,55 @@
+{
+  "version": 8,
+  "name": "Contours UK",
+  "sources": {
+    "contours": {
+      "type": "vector",
+      "url": "mbtiles://contours"
+    }
+  },
+  "layers": [
+    {
+      "id": "contour-lines",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "paint": {
+        "line-color": "#8B6914",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          8, 0.5,
+          14, 1.5
+        ],
+        "line-opacity": 0.6
+      }
+    },
+    {
+      "id": "contour-index",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "filter": ["==", ["%", ["get", "elev"], 50], 0],
+      "paint": {
+        "line-color": "#6B4F0A",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "contour-labels",
+      "type": "symbol",
+      "source": "contours",
+      "source-layer": "contours",
+      "filter": ["==", ["%", ["get", "elev"], 50], 0],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{elev}m",
+        "text-size": 10
+      },
+      "paint": {
+        "text-color": "#6B4F0A",
+        "text-halo-color": "#fff",
+        "text-halo-width": 1
+      }
+    }
+  ]
+}

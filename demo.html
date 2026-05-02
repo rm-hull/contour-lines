@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>UK Contour Lines</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+    <link
+      href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      const map = new maplibregl.Map({
+        container: "map",
+        style: "http://localhost:8080/styles/contours/style.json",
+        center: [-1.5, 53.5],
+        zoom: 12,
+      });
+
+      map.on("load", () => {
+        // 1. Add Background Color Layer (Sea)
+        map.addLayer(
+          {
+            id: "background",
+            type: "background",
+            paint: { "background-color": "#dbeafe" }, // Light blue for sea
+          },
+          "contour-lines",
+        );
+
+        // 2. Add UK Boundary GeoJSON (Local file)
+        map.addSource("uk-boundary", {
+          type: "geojson",
+          data: "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_December_2023_Boundaries_UK_BGC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
+        });
+
+        // 3. Add a fill layer for the landmass
+        map.addLayer(
+          {
+            id: "uk-fill",
+            type: "fill",
+            source: "uk-boundary",
+            paint: {
+              "fill-color": "#f8f4f0", // Light cream for land
+              "fill-opacity": 1,
+            },
+          },
+          "contour-lines",
+        );
+
+        // 4. Add a line layer for the clean outline
+        map.addLayer(
+          {
+            id: "uk-outline",
+            type: "line",
+            source: "uk-boundary",
+            paint: {
+              "line-color": "#94a3b8", // Greyish blue for the border
+              "line-width": 1,
+            },
+          },
+          "contour-lines",
+        );
+      });
+
+      map.on("error", (e) => {
+        console.error("MapLibre error:", e.error);
+      });
+
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+      map.addControl(
+        new maplibregl.ScaleControl({ maxWidth: 200, unit: "metric" }),
+      );
+    </script>
+  </body>
+</html>
