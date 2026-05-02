@@ -49,7 +49,7 @@
         // 2. Add UK Boundary GeoJSON (Local file)
         map.addSource("uk-boundary", {
           type: "geojson",
-          data: "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_December_2023_Boundaries_UK_BGC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson",
+          data: "https://raw.githubusercontent.com/rm-hull/contour-lines/main/data/uk_boundary.geojson",
         });
 
         // 3. Add a fill layer for the landmass
