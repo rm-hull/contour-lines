@@ -23,10 +23,23 @@
         bottom: 0;
         width: 100%;
       }
+      #zoom-display {
+        position: absolute;
+        bottom: 40px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: sans-serif;
+        font-size: 12px;
+        color: #333;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <div id="zoom-display">Zoom: 12</div>
     <script>
       const map = new maplibregl.Map({
         container: "map",
@@ -35,7 +48,14 @@
         zoom: 12,
       });
 
+      const zoomDisplay = document.getElementById("zoom-display");
+      const updateZoom = () => {
+        zoomDisplay.textContent = `Zoom: ${map.getZoom().toFixed(2)}`;
+      };
+
+      map.on("zoom", updateZoom);
       map.on("load", () => {
+        updateZoom();
         // 1. Add Background Color Layer (Sea)
         map.addLayer(
           {

@@ -2,60 +2,91 @@
 
 .PHONY: all clean serve tiles
 
-# Default target: build everything
+# ─── Directories ────────────────────────────────────────────────────────────
+
+TMP        := tmp
+MBTILES    := data/mbtiles
+
+# ─── Intermediate files ──────────────────────────────────────────────────────
+
+TILE_LIST  := $(TMP)/uk_tiles.txt
+VRT        := $(TMP)/uk_dem.vrt
+GPKG       := $(TMP)/contours_uk.gpkg
+
+GEOJSON_100 := $(TMP)/contours_100m.geojson
+GEOJSON_10  := $(TMP)/contours_10m.geojson
+
+MBTILES_Z6_9  := $(TMP)/z6_7.mbtiles
+MBTILES_Z8_14 := $(TMP)/z8_14.mbtiles
+
+# ─── Final output ────────────────────────────────────────────────────────────
+
+OUTPUT := $(MBTILES)/contours_uk.mbtiles
+
+# ─── Default target ──────────────────────────────────────────────────────────
+
 all: tiles
 
-# 1. Generate list of tile URLs
-uk_tiles.txt: uk_tiles.py
+# ─── Step 1: Generate tile URL list ─────────────────────────────────────────
+
+$(TILE_LIST): uk_tiles.py
 	@echo "\033[36m→ Generating tile list...\033[0m"
-	uv run --with requests python3 uk_tiles.py --check
+	@mkdir -p $(TMP)
+	uv run --with requests python3 uk_tiles.py --check --output $(TILE_LIST)
 
-# 2. Build virtual mosaic
-uk_dem.vrt: uk_tiles.txt
+# ─── Step 2: Build virtual mosaic ────────────────────────────────────────────
+
+$(VRT): $(TILE_LIST)
 	@echo "\033[36m→ Building VRT...\033[0m"
-	gdalbuildvrt -q -input_file_list uk_tiles.txt uk_dem.vrt
+	gdalbuildvrt -q -input_file_list $< $@
 
-# 3. Generate contour lines (10m)
-tmp/contours_uk.gpkg: uk_dem.vrt
-	@mkdir -p tmp
+# ─── Step 3: Generate contour lines (25m interval) ───────────────────────────
+
+$(GPKG): $(VRT)
 	@echo "\033[36m→ Generating contours...\033[0m"
-	gdal_contour \
-		-a elev \
-		-i 10 \
-		-nln contours \
-		uk_dem.vrt \
-		tmp/contours_uk.gpkg
+	gdal_contour -a elev -i 10 -nln contours $< $@
 
-# 4. Convert to MBTiles using Tippecanoe
-data/mbtiles/contours_uk.mbtiles: tmp/contours_uk.gpkg
-	@mkdir -p data/mbtiles
-	@echo "\033[36m→ Running Tippecanoe...\033[0m"
-	ogr2ogr -f GeoJSON /vsistdout/ tmp/contours_uk.gpkg | tippecanoe \
-		--output=$@ \
-		--layer=contours \
-		--minimum-zoom=6 \
-		--maximum-zoom=14 \
-		--simplification=10 \
-		--coalesce-densest-as-needed \
-# 		--read-parallel \
-		--force \
-		/dev/stdin
+# ─── Step 4a: Extract GeoJSON at each resolution ─────────────────────────────
 
-# Shortcut to build tiles
-tiles: data/mbtiles/contours_uk.mbtiles
+$(GEOJSON_100): $(GPKG)
+	@echo "\033[36m→ Extracting 100m contours...\033[0m"
+	ogr2ogr -f GeoJSON $@ $< -sql "SELECT * FROM contours WHERE CAST(elev AS INTEGER) % 100 = 0"
 
-# Serve the map
+$(GEOJSON_10): $(GPKG)
+	@echo "\033[36m→ Extracting 10m contours...\033[0m"
+	ogr2ogr -f GeoJSON $@ $< -sql "SELECT * FROM contours WHERE CAST(elev AS INTEGER) % 10 = 0"
+
+# ─── Step 4b: Tile each zoom band ────────────────────────────────────────────
+
+$(MBTILES_Z6_7): $(GEOJSON_100)
+	@echo "\033[36m→ Tiling z6–9...\033[0m"
+	tippecanoe --output=$@ --layer=contours \
+	  --minimum-zoom=6 --maximum-zoom=9 \
+	  --simplification=10 --coalesce-densest-as-needed --force $<
+
+$(MBTILES_Z8_14): $(GEOJSON_10)
+	@echo "\033[36m→ Tiling z12–14...\033[0m"
+	tippecanoe --output=$@ --layer=contours \
+	  --minimum-zoom=12 --maximum-zoom=14 \
+	  --simplification=5 --coalesce-densest-as-needed --force $<
+
+# ─── Step 5: Join zoom bands into final MBTiles ──────────────────────────────
+
+$(OUTPUT): $(MBTILES_Z6_7) $(MBTILES_Z8_14)
+	@mkdir -p $(MBTILES)
+	@echo "\033[36m→ Joining MBTiles...\033[0m"
+	tile-join --output=$@ --force $^
+
+# ─── Shortcuts ───────────────────────────────────────────────────────────────
+
+tiles: $(OUTPUT)
+
 serve:
 	@echo "\033[32m→ Starting TileServer GL...\033[0m"
-	docker run -p 8080:8080 \
-		-v $(shell pwd)/data:/data \
-		maptiler/tileserver-gl \
-		--config /data/config.json \
-		--public_url=http://localhost:8080
+	docker run -p 8080:8080 -v $(shell pwd)/data:/data maptiler/tileserver-gl \
+	  --config /data/config.json --public_url=http://localhost:8080
 
-# Clean workspace
 clean:
 	@echo "\033[33m→ Cleaning workspace...\033[0m"
-	rm -f uk_tiles.txt uk_dem.vrt
-	rm -rf tmp/*.gpkg tmp/*.geojson
-	rm -f data/mbtiles/contours_uk.mbtiles
+	rm -rf $(TMP)
+	rm -f $(OUTPUT)

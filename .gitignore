@@ -1,5 +1,2 @@
-contours_uk.geojson
-contours_uk.gpkg
 contours_uk.mbtiles*
-uk_dem.vrt
-uk_tiles.txt
+tmp/

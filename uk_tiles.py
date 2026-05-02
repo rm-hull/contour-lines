@@ -13,6 +13,7 @@ def tile_exists(url, verbose=False):
 parser = argparse.ArgumentParser(description="Generate Copernicus DEM tile list for UK")
 parser.add_argument("--check", action="store_true", help="Check each tile exists before including it")
 parser.add_argument("--verbose", "-v", action="store_true", help="Log skipped tiles")
+parser.add_argument("--output", "-o", default="tmp/uk_tiles.txt", help="Output file path (default: tmp/uk_tiles.txt)")
 args = parser.parse_args()
 
 lats = range(49, 62)
@@ -31,7 +32,7 @@ for lat in lats:
         else:
             urls.append(url)
 
-with open("uk_tiles.txt", "w") as f:
+with open(args.output, "w") as f:
     f.write("\n".join(urls))
 
-print(f"Written {len(urls)} tiles to uk_tiles.txt")
+print(f"Written {len(urls)} tiles to {args.output}")
