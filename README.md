@@ -59,7 +59,7 @@ Simply open `demo.html` in your browser. The viewer includes:
 
 ## Technical Stack
 
--   **Data Source**: [Copernicus GLO-30](https://copernicus-dem-30m.s3.amazonaws.com/index.html) (Cloud Optimized GeoTIFFs).
+-   **Data Source**: [Copernicus GLO-30](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM) (Cloud Optimized GeoTIFFs).
 -   **Processing**:
     -   `GDAL`: Virtual raster handling and contour generation.
     -   `Tippecanoe`: Building optimized vector tiles (Minimum zoom 6).
@@ -79,7 +79,5 @@ The provided style (`data/styles/contours/style.json`) implements:
 Software is provided under the [MIT License](LICENSE.md).
 
 > _This dataset was derived/produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved_
->
-> See: https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
 
 UK boundary GeoJSON sourced from: https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_December_2023_Boundaries_UK_BGC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
