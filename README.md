@@ -45,7 +45,7 @@ brew install --cask docker
 The entire data processing pipeline is automated. This will fetch tile URLs, build a virtual mosaic, generate contours, and encode them into optimized vector tiles (zooms 6-14).
 
 ```console
-make tiles
+make all
 ```
 
 ### 2. Serve the Map
