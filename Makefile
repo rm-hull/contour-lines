@@ -17,17 +17,20 @@ GEOJSON_100 := $(TMP)/contours_100m.geojson
 GEOJSON_50  := $(TMP)/contours_50m.geojson
 GEOJSON_10  := $(TMP)/contours_10m.geojson
 
+GEOJSON_BOUNDARY := data/uk_boundary.geojson
+
 MBTILES_Z6_7   := $(TMP)/z6_7.mbtiles
 MBTILES_Z8_9   := $(TMP)/z8_9.mbtiles
 MBTILES_Z10_14 := $(TMP)/z10_14.mbtiles
 
 # ─── Final output ────────────────────────────────────────────────────────────
 
-OUTPUT := $(MBTILES)/contours_uk.mbtiles
+CONTOURS_OUTPUT := $(MBTILES)/uk_contours.mbtiles
+BOUNDARY_OUTPUT := $(MBTILES)/uk_boundary.mbtiles
 
 # ─── Default target ──────────────────────────────────────────────────────────
 
-all: tiles
+all: contours boundary
 
 # ─── Step 1: Generate tile URL list ─────────────────────────────────────────
 
@@ -66,32 +69,41 @@ $(GEOJSON_10): $(GPKG)
 
 $(MBTILES_Z6_7): $(GEOJSON_100)
 	@echo "\033[36m→ Tiling z6–7...\033[0m"
-	tippecanoe --output=$@ --layer=contours \
+	tippecanoe --output=$@ --layer=uk_contours \
 	  --minimum-zoom=6 --maximum-zoom=7 \
 	  --simplification=5 --coalesce-densest-as-needed --force $<
 
 $(MBTILES_Z8_9): $(GEOJSON_50)
 	@echo "\033[36m→ Tiling z8–9...\033[0m"
-	tippecanoe --output=$@ --layer=contours \
+	tippecanoe --output=$@ --layer=uk_contours \
 	  --minimum-zoom=8 --maximum-zoom=9 \
 	  --simplification=5 --coalesce-densest-as-needed --force $<
 
 $(MBTILES_Z10_14): $(GEOJSON_10)
 	@echo "\033[36m→ Tiling z10–14...\033[0m"
-	tippecanoe --output=$@ --layer=contours \
+	tippecanoe --output=$@ --layer=uk_contours \
 	  --minimum-zoom=10 --maximum-zoom=14 \
 	  --simplification=5 --coalesce-densest-as-needed --force $<
 
 # ─── Step 5: Join zoom bands into final MBTiles ──────────────────────────────
 
-$(OUTPUT): $(MBTILES_Z6_7) $(MBTILES_Z8_9) $(MBTILES_Z10_14)
+$(CONTOURS_OUTPUT): $(MBTILES_Z6_7) $(MBTILES_Z8_9) $(MBTILES_Z10_14)
 	@mkdir -p $(MBTILES)
 	@echo "\033[36m→ Joining MBTiles...\033[0m"
 	tile-join --output=$@ --force $^
 
+# ─── Step 6: Tile boundary ────────────────────────────────────────────────────
+
+$(BOUNDARY_OUTPUT): $(GEOJSON_BOUNDARY)
+	@echo "\033[36m→ Tiling boundary...\033[0m"
+	tippecanoe --output=$@ --layer=uk_boundary \
+	  --minimum-zoom=0 --maximum-zoom=14 \
+	  --simplification=10 --coalesce-densest-as-needed --force $<
+
 # ─── Shortcuts ───────────────────────────────────────────────────────────────
 
-tiles: $(OUTPUT)
+contours: $(CONTOURS_OUTPUT)
+boundary: $(BOUNDARY_OUTPUT)
 
 serve:
 	@echo "\033[32m→ Starting TileServer GL...\033[0m"

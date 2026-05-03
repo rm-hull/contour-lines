@@ -43,7 +43,7 @@
     <script>
       const map = new maplibregl.Map({
         container: "map",
-        style: "http://localhost:8080/styles/contours/style.json",
+        style: "http://localhost:8080/styles/uk_contours/style.json",
         center: [-1.5, 53.5],
         zoom: 12,
       });
@@ -88,8 +88,8 @@
 
         // 2. UK boundary source
         map.addSource("uk-boundary", {
-          type: "geojson",
-          data: "https://raw.githubusercontent.com/rm-hull/contour-lines/main/data/uk_boundary.geojson",
+          type: "vector",
+          url: "http://localhost:8080/data/uk_boundary.json",
         });
 
         // 3. Land fill
@@ -98,6 +98,7 @@
             id: "uk-fill",
             type: "fill",
             source: "uk-boundary",
+            "source-layer": "uk_boundary",
             paint: { "fill-color": "#f8f4f0", "fill-opacity": 1 },
           },
           "contour-lines",
@@ -109,6 +110,7 @@
             id: "uk-outline",
             type: "line",
             source: "uk-boundary",
+            "source-layer": "uk_boundary",
             paint: { "line-color": "#94a3b8", "line-width": 1 },
           },
           "contour-lines",

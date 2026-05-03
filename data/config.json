@@ -10,13 +10,19 @@
     }
   },
   "styles": {
-    "contours": {
-      "style": "contours/style.json"
+    "uk_contours": {
+      "style": "uk_contours.json"
+    },
+    "uk_boundary": {
+      "style": "uk_boundary.json"
     }
   },
   "data": {
-    "contours": {
-      "mbtiles": "contours_uk.mbtiles"
+    "uk_contours": {
+      "mbtiles": "uk_contours.mbtiles"
+    },
+    "uk_boundary": {
+      "mbtiles": "uk_boundary.mbtiles"
     }
   }
 }

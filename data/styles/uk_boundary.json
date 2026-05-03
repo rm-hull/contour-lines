@@ -1,0 +1,32 @@
+{
+  "version": 8,
+  "name": "UK Boundary",
+  "sources": {
+    "uk_boundary": {
+      "type": "vector",
+      "url": "mbtiles://uk_boundary"
+    }
+  },
+  "layers": [
+    {
+      "id": "uk-fill",
+      "type": "fill",
+      "source": "uk_boundary",
+      "source-layer": "uk_boundary",
+      "paint": {
+        "fill-color": "#e8f4e8",
+        "fill-opacity": 0.5
+      }
+    },
+    {
+      "id": "uk-outline",
+      "type": "line",
+      "source": "uk_boundary",
+      "source-layer": "uk_boundary",
+      "paint": {
+        "line-color": "#333",
+        "line-width": 1.5
+      }
+    }
+  ]
+}

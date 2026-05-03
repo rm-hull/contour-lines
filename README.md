@@ -1,4 +1,4 @@
-# Contour Lines UK
+# UK Contour Lines
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![GDAL](https://img.shields.io/badge/GDAL-3.x-green.svg)](https://gdal.org/)
@@ -9,8 +9,14 @@ A complete pipeline for generating, serving, and visualizing high-resolution vec
 
 ![screenshot](./screenshot.webp)
 
-A map tile server is available at https://map-tiles.destructuring-bind.org/styles/contours/style.json for light use. Please don't abuse this service: host the tiles yourself instead - re-generate them yourself using this pipeline, or
-contact me and I can supply the resultant `contours_uk.mbtiles` file.
+A development map tile server is available the supplies two vector tile sets (generated using this pipeline):
+
+  * Contour lines (https://map-tiles.destructuring-bind.org/styles/uk_contours/style.json)
+  * UK Boundary (https://map-tiles.destructuring-bind.org/styles/uk_boundary/style.json)
+
+Please don't abuse this service: it is intended for light use only. Host the tiles yourself instead - 
+re-generate them using this pipeline, or contact me and I can supply the resultant `uk_contours.mbtiles`
+or `uk_boundary.mbtiles` files.
 
 ## Features
 
